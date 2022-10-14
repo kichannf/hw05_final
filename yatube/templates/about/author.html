@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Об авторе проекта{% endblock %}
+
+
+{% block content %}
+<h1>Привет, я Николай</h1>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <h1>Николай - это YaTube</h2>
+        <img src="{% static 'img/myself.png' %}" width="630" height="420" class="d-inline-block align-top" alt="">
+      </div>
+    </div>
+  </div>
+<div class="container">
+  <div class="row">
+    <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-6">
+      <p>Я пытаюсь научиться чему-то в программирование!</p>
+      <p>Работа велась активная, возникали большие трудности.</p>
+      <p>Тем не менее. Работа проделана и сайт огонек невероятный!</p>
+      <p>Регестрируйcя поскорее и успей насладиться всеми плюсами</p>
+      <p>А по промокоду POWWWWER получи прелестный сон о том как ты отдыхаешь на Волжском острове!</p>
+      <p>Что бы узнать о технической состовляющей проекта, кликай ниже</p>
+      <h3>
+        <a href="http://127.0.0.1:8000/about/tech/" class="button">О проекте</a>
+      </h3>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h2>Контакты для связи</h2>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <p>Телефон: 8 (800) 555-35-35</p>
+      <p>Почта: <a href="mailto: kreml@rf.ru">kreml@rf.ru</a></p>
+      <p>Скайп: nikolay</p>
+      <p> ГитХаб:<a href="https://github.com/kichannf/">https://github.com/kichannf/</a> </p>
+    </div>
+  </div>
+</div>
+{% endblock %} 
