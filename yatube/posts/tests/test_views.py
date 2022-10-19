@@ -49,6 +49,8 @@ class PostViewsTests(TestCase):
         (Post.objects.bulk_create(posts))
         # Добавил time.sleep что бы пост созданный в переменной post,
         # по которой я тестирую, всегда был в срезе [0]
+        # если я его убираю, то раз в 2-3 раза, видимо из-за сортировки по дате
+        # тесты не проходят
         time.sleep(0.0001)
         cls.post = Post.objects.create(
             author=cls.user,
@@ -119,7 +121,7 @@ class PostViewsTests(TestCase):
     def test_page_index_paginator(self):
         """Проверка паджинатора страницы index"""
         response = self.authorized_client.get(self.index_url)
-        self.assertEquals(len(response.context['page_obj']), 10)
+        self.assertEqual(len(response.context['page_obj']), 10)
         response = self.authorized_client.get(self.index_url + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
 
@@ -141,7 +143,7 @@ class PostViewsTests(TestCase):
     def test_group_list_page_paginator(self):
         """Проверка паджинатора страницы group_list"""
         response = self.authorized_client.get(self.group_list_url)
-        self.assertEquals(len(response.context['page_obj']), 10)
+        self.assertEqual(len(response.context['page_obj']), 10)
         response = self.authorized_client.get(self.group_list_url + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
 
@@ -163,7 +165,7 @@ class PostViewsTests(TestCase):
     def test_profile_url_page_paginator(self):
         """Проверка паджинатора страницы profile_url"""
         response = self.authorized_client.get(self.profile_url)
-        self.assertEquals(len(response.context['page_obj']), 10)
+        self.assertEqual(len(response.context['page_obj']), 10)
         response = self.authorized_client.get(self.profile_url + '?page=2')
         self.assertEqual(len(response.context['page_obj']), 3)
 
@@ -238,16 +240,30 @@ class PostViewsTests(TestCase):
 
     def test_profile_follow(self):
         """Авторизованный пользователь может подписываться на других"""
-        count = Follow.objects.count()
         self.authorized_client2.get(self.profile_follow_url)
-        self.assertEqual(Follow.objects.count(), count + 1)
+        self.assertTrue(
+            Follow.objects.filter(
+                user=PostViewsTests.user2,
+                author=PostViewsTests.user).exists()
+        )
 
     def test_profile_unfollow(self):
         """Авторизованный пользователь может отписываться"""
-        self.authorized_client2.get(self.profile_follow_url)
-        count = Follow.objects.count()
         self.authorized_client2.get(self.unprofile_follow_url)
-        self.assertEqual(Follow.objects.count(), count - 1)
+        self.assertFalse(
+            Follow.objects.filter(
+                user=PostViewsTests.user2,
+                author=PostViewsTests.user).exists()
+        )
+
+    def test_cant_follow_youself(self):
+        """Нельзя подписаться на самого себя"""
+        self.authorized_client.get(self.profile_follow_url)
+        self.assertFalse(
+            Follow.objects.filter(
+                user=PostViewsTests.user,
+                author=PostViewsTests.user).exists()
+        )
 
     def test_follow_index(self):
         """Новая запись появляется в ленте тех, кто на него подписан"""

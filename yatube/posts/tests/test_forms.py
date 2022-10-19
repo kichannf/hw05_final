@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+from xml.etree.ElementTree import Comment
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -7,7 +8,7 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..forms import PostForm
-from ..models import Post, Group, User
+from ..models import Comment, Post, Group, User
 
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -99,3 +100,17 @@ class PostFormsTests(TestCase):
             'posts:post_detail', args=[PostFormsTests.post.pk]))
         self.assertEqual(post_latest.text, form_data['text'])
         self.assertEqual(post_latest.group.pk, form_data['group'])
+
+    def test_form_coment(self):
+        """"Форма создает комментарий"""
+        form_data = {
+            'text': 'тестовый комментарий',
+        }
+        self.authorized_client.post(
+            reverse('posts:add_comment', args=[PostFormsTests.post.pk]),
+            data=form_data,
+            follow=True
+        )
+        self.assertTrue(
+            Comment.objects.filter(text=form_data['text']).exists()
+        )

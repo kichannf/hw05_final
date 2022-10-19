@@ -13,7 +13,7 @@ def paginator(request, queryset):
     return paginator.get_page(page_number)
 
 
-@cache_page(60 * 20, key_prefix='index_page')
+@cache_page(1200, key_prefix='index_page')
 def index(request):
     template = 'posts/index.html'
     post_list = Post.objects.all()
@@ -39,18 +39,16 @@ def profile(request, username):
     template = 'posts/profile.html'
     posts = author.posts.select_related('author')
     if request.user.is_authenticated:
-        follow = Follow.objects.filter(
+        following = False
+        if Follow.objects.filter(
             user=request.user,
             author=author
-        )
-        if follow.exists():
+        ).exists():
             following = True
-        else:
-            following = False
         context = {
             'page_obj': paginator(request, posts),
             'author': author,
-            'following': following
+            'following': following,
         }
     else:
         context = {
@@ -129,13 +127,10 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = User.objects.get(username=username)
-    follow = Follow.objects.filter(
-        user=request.user,
-        author=author
-    )
-    if not follow.exists() and not request.user == author:
-        Follow.objects.create(
-            user=request.user, author=author
+    if request.user != author:
+        Follow.objects.get_or_create(
+            user=request.user,
+            author=author
         )
     return redirect('posts:profile', username)
 
@@ -143,10 +138,8 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    follow = Follow.objects.filter(
+    Follow.objects.filter(
         user=request.user,
         author=author
-    )
-    if follow.exists() and request.user != username:
-        follow.delete()
+    ).delete()
     return redirect('posts:profile', username)
