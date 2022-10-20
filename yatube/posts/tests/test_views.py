@@ -43,7 +43,7 @@ class PostViewsTests(TestCase):
             Post(
                 author=cls.user, group=cls.group,
                 text=f'{n} Текстовый пост'
-            )  
+            )
             for n in range(2, 14)
         ]
         (Post.objects.bulk_create(posts))
