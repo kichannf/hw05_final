@@ -44,7 +44,7 @@ class Post(CreatModel):
     )
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ('-pub_date', '-id')
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
 
@@ -93,9 +93,9 @@ class Follow(models.Model):
     )
 
     class Meta:
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
-                fields=['user', 'author'],
+                fields=('user', 'author',),
                 name='unique_user'
-            )
-        ]
+            ),
+        )

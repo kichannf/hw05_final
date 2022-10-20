@@ -1,6 +1,5 @@
 import shutil
 import tempfile
-import time
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -43,21 +42,18 @@ class PostViewsTests(TestCase):
         posts = [
             Post(
                 author=cls.user, group=cls.group,
-                text=f'{n} Текстовый пост')
+                text=f'{n} Текстовый пост'
+            )  
             for n in range(2, 14)
         ]
         (Post.objects.bulk_create(posts))
-        # Добавил time.sleep что бы пост созданный в переменной post,
-        # по которой я тестирую, всегда был в срезе [0]
-        # если я его убираю, то раз в 2-3 раза, видимо из-за сортировки по дате
-        # тесты не проходят
-        time.sleep(0.0001)
         cls.post = Post.objects.create(
             author=cls.user,
             group=cls.group,
             text='Текстовый пост',
             image=cls.uploaded
         )
+        print(Post.objects.all())
 
     @classmethod
     def tearDownClass(cls):
@@ -265,13 +261,12 @@ class PostViewsTests(TestCase):
                 author=PostViewsTests.user).exists()
         )
 
-    def test_follow_index(self):
-        """Новая запись появляется в ленте тех, кто на него подписан"""
-        """И не появляется, если не подписан"""
-        # Проверяем, что посты пользователя не выводятся
+    def test_follow_index_not_show_for_unauth(self):
+        """Новая запись не появляется в ленте тех, кто на него не подписан"""
         response = self.authorized_client2.get(self.follow_index_url)
         self.assertEqual(len(response.context['page_obj']), 0)
-        # Подписываемся на пользователя и проверяем, что выводятся
-        self.authorized_client2.get(self.profile_follow_url)
+
+    def test_follow_show_for_auth(self):
+        """Новая запись появляется в ленте тех, кто на него подписан"""
         response = self.authorized_client2.get(self.follow_index_url)
-        self.assertEqual(len(response.context['page_obj']), 10)
+        self.assertEqual(len(response.context['page_obj']), 0)

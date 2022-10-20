@@ -38,23 +38,15 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     template = 'posts/profile.html'
     posts = author.posts.select_related('author')
-    if request.user.is_authenticated:
-        following = False
-        if Follow.objects.filter(
-            user=request.user,
-            author=author
-        ).exists():
-            following = True
-        context = {
-            'page_obj': paginator(request, posts),
-            'author': author,
-            'following': following,
-        }
-    else:
-        context = {
-            'page_obj': paginator(request, posts),
-            'author': author,
-        }
+    following = (
+        request.user.is_authenticated and Follow.objects.filter(
+            user=request.user, author=author).exists()
+    )
+    context = {
+        'page_obj': paginator(request, posts),
+        'author': author,
+        'following': following,
+    }
     return render(request, template, context)
 
 
